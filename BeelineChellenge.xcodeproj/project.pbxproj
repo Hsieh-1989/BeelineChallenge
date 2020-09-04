@@ -14,6 +14,8 @@
 		173F31712501D9B000F26AE8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 173F31702501D9B000F26AE8 /* Assets.xcassets */; };
 		173F31742501D9B000F26AE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 173F31722501D9B000F26AE8 /* LaunchScreen.storyboard */; };
 		173F317F2501D9B000F26AE8 /* BeelineChellengeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173F317E2501D9B000F26AE8 /* BeelineChellengeTests.swift */; };
+		173F318A2501DEC000F26AE8 /* LocationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173F31892501DEC000F26AE8 /* LocationClient.swift */; };
+		173F318C2502036F00F26AE8 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173F318B2502036F00F26AE8 /* ViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +40,8 @@
 		173F317A2501D9B000F26AE8 /* BeelineChellengeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeelineChellengeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		173F317E2501D9B000F26AE8 /* BeelineChellengeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeelineChellengeTests.swift; sourceTree = "<group>"; };
 		173F31802501D9B000F26AE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		173F31892501DEC000F26AE8 /* LocationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationClient.swift; sourceTree = "<group>"; };
+		173F318B2502036F00F26AE8 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +86,8 @@
 				173F31672501D9AE00F26AE8 /* AppDelegate.swift */,
 				173F31692501D9AE00F26AE8 /* SceneDelegate.swift */,
 				173F316B2501D9AE00F26AE8 /* ViewController.swift */,
+				173F318B2502036F00F26AE8 /* ViewModel.swift */,
+				173F31892501DEC000F26AE8 /* LocationClient.swift */,
 				173F316D2501D9AE00F26AE8 /* Main.storyboard */,
 				173F31702501D9B000F26AE8 /* Assets.xcassets */,
 				173F31722501D9B000F26AE8 /* LaunchScreen.storyboard */,
@@ -200,9 +206,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				173F318C2502036F00F26AE8 /* ViewModel.swift in Sources */,
 				173F316C2501D9AE00F26AE8 /* ViewController.swift in Sources */,
 				173F31682501D9AE00F26AE8 /* AppDelegate.swift in Sources */,
 				173F316A2501D9AE00F26AE8 /* SceneDelegate.swift in Sources */,
+				173F318A2501DEC000F26AE8 /* LocationClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +371,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CLR8T229GF;
 				INFOPLIST_FILE = BeelineChellenge/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -380,6 +389,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CLR8T229GF;
 				INFOPLIST_FILE = BeelineChellenge/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
