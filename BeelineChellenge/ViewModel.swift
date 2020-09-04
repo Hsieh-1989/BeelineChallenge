@@ -9,6 +9,19 @@
 import Combine
 import CoreLocation
 
+struct TravelData {
+    
+    let start: Date
+    let end: Date
+    let distance: CLLocationDistance
+    
+    // km/hr
+    var averageSpeed: Double {
+        let totalTime = end.timeIntervalSince(start) / (60*60)
+        return (distance / 1000) / totalTime
+    }
+}
+
 final class ViewModel {
     
     enum State {
@@ -47,13 +60,19 @@ final class ViewModel {
         trackingLocationsSubject.eraseToAnyPublisher()
     }
     
+    var travelData: AnyPublisher<TravelData, Never> {
+        travelDataSubject.eraseToAnyPublisher()
+    }
+    
     // MARK: Private Property
+    private var startTime: Date?
     private let currentStateSubject = CurrentValueSubject<State, Never>(.idle)
     private let currentLocationsSubject = CurrentValueSubject<CLLocation?, Never>(nil)
     private let trackingLocationsSubject = CurrentValueSubject<[CLLocation], Never>([])
     
     private let startLocationSubject = CurrentValueSubject<CLLocationCoordinate2D?, Never>(nil)
     private let endLocationSubject = CurrentValueSubject<CLLocationCoordinate2D?, Never>(nil)
+    private let travelDataSubject = PassthroughSubject<TravelData, Never>()
     
     private let locationClient: LocationClient
     private var disposeBag = Set<AnyCancellable>()
@@ -81,6 +100,7 @@ final class ViewModel {
         switch currentStateSubject.value {
         case .idle:
             currentStateSubject.send(.tracking)
+            startTime = Date()
             
             if let location = currentLocationsSubject.value {
                 startLocationSubject.send(location.coordinate)
@@ -90,6 +110,8 @@ final class ViewModel {
                 endLocationSubject.send(location.coordinate)
             }
             currentStateSubject.send(.finish)
+            buildTravelData()
+            
         case .finish:
             trackingLocationsSubject.send([])
             startLocationSubject.send(nil)
@@ -128,6 +150,18 @@ final class ViewModel {
         guard let last = locations.last else { return }
         currentLocationsSubject.send(last)
         trackingLocationsSubject.send(trackingLocationsSubject.value + [last])
+    }
+    
+    private func buildTravelData() {
+        guard let start = startTime else { return }
+        let distance: CLLocationDistance = zip(
+            trackingLocationsSubject.value,
+            trackingLocationsSubject.value.dropFirst()
+        ).reduce(0) {
+            $0 + $1.1.distance(from: $1.0)
+        }
+        let data = TravelData(start: start, end: .init(), distance: distance)
+        travelDataSubject.send(data)
     }
 }
 

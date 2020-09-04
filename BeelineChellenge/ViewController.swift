@@ -100,6 +100,11 @@ class ViewController: UIViewController {
             .sink { [mapView] in mapView?.centerToLocation($0) }
             .store(in: &disposeBag)
         
+        // present travel data
+        viewModel.travelData
+            .sink { [weak self] in self?.showData($0) }
+            .store(in: &disposeBag)
+        
         viewModel.viewDidLoad()
     }
     
@@ -120,6 +125,17 @@ class ViewController: UIViewController {
         let end = locations[locations.endIndex-1]
         let line = MKPolyline(coordinates: [start.coordinate, end.coordinate], count: 2)
         mapView.addOverlay(line)
+    }
+    
+    private func showData(_ data: TravelData) {
+        let message = """
+        distance: \(data.distance)m
+        duration: \(data.end.timeIntervalSince(data.start))s
+        average speed: \(data.averageSpeed) km/hr
+        """
+        let alert = UIAlertController(title: "END", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }
 
