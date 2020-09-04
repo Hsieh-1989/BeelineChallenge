@@ -89,6 +89,11 @@ class ViewController: UIViewController {
             .sink { [weak self] in self?.drawLine(to: $0) }
             .store(in: &disposeBag)
         
+        viewModel.locationList
+            .filter(\.isEmpty)
+            .sink { [mapView] _ in mapView?.removeOverlays(mapView?.overlays ?? []) }
+            .store(in: &disposeBag)
+        
         // update current location
         viewModel.locationList
             .compactMap(\.last)
@@ -106,10 +111,27 @@ class ViewController: UIViewController {
     // MARK: Private Method
     private func setupMapView() {
         mapView.showsUserLocation = true
+        mapView.delegate = self
     }
     
     private func drawLine(to locations: [CLLocation]) {
-        print("drawLine", locations)
+        guard locations.count >= 2 else { return }
+        let start = locations[locations.endIndex-2]
+        let end = locations[locations.endIndex-1]
+        let line = MKPolyline(coordinates: [start.coordinate, end.coordinate], count: 2)
+        mapView.addOverlay(line)
+    }
+}
+
+extension ViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if let line = overlay as? MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: line)
+            renderer.lineWidth = 5
+            renderer.strokeColor = .blue
+            return renderer
+        }
+        return MKOverlayRenderer(overlay: overlay)
     }
 }
 
