@@ -18,6 +18,11 @@ final class ViewModel {
     }
     
     // MARK: Output
+    var actionButtonEnabled: AnyPublisher<Bool, Never> {
+        currentLocationsSubject
+            .map { $0 != nil }
+            .eraseToAnyPublisher()
+    }
     var actionButtonTitle: AnyPublisher<String, Never> {
         currentStateSubject
             .map(\.buttonTitle)
@@ -30,13 +35,25 @@ final class ViewModel {
             .eraseToAnyPublisher()
     }
     
+    var startLocation: AnyPublisher<CLLocationCoordinate2D?, Never> {
+        startLocationSubject.eraseToAnyPublisher()
+    }
+    
+    var endLocation: AnyPublisher<CLLocationCoordinate2D?, Never> {
+        endLocationSubject.eraseToAnyPublisher()
+    }
+    
     var locationList: AnyPublisher<[CLLocation], Never> {
         trackingLocationsSubject.eraseToAnyPublisher()
     }
     
     // MARK: Private Property
     private let currentStateSubject = CurrentValueSubject<State, Never>(.idle)
+    private let currentLocationsSubject = CurrentValueSubject<CLLocation?, Never>(nil)
     private let trackingLocationsSubject = CurrentValueSubject<[CLLocation], Never>([])
+    
+    private let startLocationSubject = CurrentValueSubject<CLLocationCoordinate2D?, Never>(nil)
+    private let endLocationSubject = CurrentValueSubject<CLLocationCoordinate2D?, Never>(nil)
     
     private let locationClient: LocationClient
     private var disposeBag = Set<AnyCancellable>()
@@ -60,13 +77,23 @@ final class ViewModel {
     }
     
     func actionButtonDidTap() {
+        // FIXME: Clean up the logic
         switch currentStateSubject.value {
         case .idle:
             currentStateSubject.send(.tracking)
+            
+            if let location = currentLocationsSubject.value {
+                startLocationSubject.send(location.coordinate)
+            }
         case .tracking:
+            if let location = currentLocationsSubject.value {
+                endLocationSubject.send(location.coordinate)
+            }
             currentStateSubject.send(.finish)
         case .finish:
             trackingLocationsSubject.send([])
+            startLocationSubject.send(nil)
+            endLocationSubject.send(nil)
             currentStateSubject.send(.idle)
         }
     }
@@ -99,6 +126,7 @@ final class ViewModel {
     
     private func didUpdateLocations(_ locations: [CLLocation]) {
         guard let last = locations.last else { return }
+        currentLocationsSubject.send(last)
         trackingLocationsSubject.send(trackingLocationsSubject.value + [last])
     }
 }

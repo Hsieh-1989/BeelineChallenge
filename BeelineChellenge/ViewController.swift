@@ -17,6 +17,30 @@ class ViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     
     // MARK: Property
+    private var startAnnotation: MKPointAnnotation? = nil {
+        didSet {
+            guard isViewLoaded else { return }
+            if let oldAnnotation = oldValue {
+                mapView.removeAnnotation(oldAnnotation)
+            }
+            if let annotation = startAnnotation {
+                mapView.addAnnotation(annotation)
+            }
+        }
+    }
+    
+    private var endAnnotation: MKPointAnnotation? = nil {
+        didSet {
+            guard isViewLoaded else { return }
+            if let oldAnnotation = oldValue {
+                mapView.removeAnnotation(oldAnnotation)
+            }
+            if let annotation = endAnnotation {
+                mapView.addAnnotation(annotation)
+            }
+        }
+    }
+    
     private var viewModel: ViewModel!
     private var disposeBag = Set<AnyCancellable>()
     
@@ -25,13 +49,51 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         setupMapView()
         viewModel = ViewModel()
-        viewModel.actionButtonTitle.sink { [actionButton] title in
-            actionButton?.title = title
-        }.store(in: &disposeBag)
         
-        viewModel.locationList.compactMap(\.last).sink { [mapView] location in
-            mapView?.centerToLocation(location)
-        }.store(in: &disposeBag)
+        viewModel.actionButtonEnabled
+            .assign(to: \.isEnabled, on: actionButton)
+            .store(in: &disposeBag)
+        
+        viewModel.actionButtonTitle
+            .sink { [actionButton] in actionButton?.title = $0 }
+            .store(in: &disposeBag)
+        
+        // start annotation
+        viewModel.startLocation.map { coordinate -> MKPointAnnotation? in
+            guard let coordinate = coordinate else { return nil }
+            let annotation = MKPointAnnotation()
+            annotation.title = "START"
+            annotation.coordinate = coordinate
+            return annotation
+        }
+        .assign(to: \.startAnnotation, on: self)
+        .store(in: &disposeBag)
+        
+        // end annotation
+        viewModel.endLocation.map { coordinate -> MKPointAnnotation? in
+            guard let coordinate = coordinate else { return nil }
+            let annotation = MKPointAnnotation()
+            annotation.title = "END"
+            annotation.coordinate = coordinate
+            return annotation
+        }
+        .assign(to: \.endAnnotation, on: self)
+        .store(in: &disposeBag)
+        
+        
+        // draw line while tracking
+        viewModel.locationList
+            .combineLatest(viewModel.isTracking)
+            .filter { $0.1 }
+            .map { $0.0 }
+            .sink { [weak self] in self?.drawLine(to: $0) }
+            .store(in: &disposeBag)
+        
+        // update current location
+        viewModel.locationList
+            .compactMap(\.last)
+            .sink { [mapView] in mapView?.centerToLocation($0) }
+            .store(in: &disposeBag)
         
         viewModel.viewDidLoad()
     }
@@ -45,12 +107,16 @@ class ViewController: UIViewController {
     private func setupMapView() {
         mapView.showsUserLocation = true
     }
+    
+    private func drawLine(to locations: [CLLocation]) {
+        print("drawLine", locations)
+    }
 }
 
 private extension MKMapView {
     func centerToLocation(
         _ location: CLLocation,
-        regionRadius: CLLocationDistance = 1000
+        regionRadius: CLLocationDistance = 100
     ) {
         let coordinateRegion = MKCoordinateRegion(
             center: location.coordinate,
