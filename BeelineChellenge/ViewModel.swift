@@ -20,15 +20,14 @@ final class ViewModel {
     // MARK: Output
     var actionButtonTitle: AnyPublisher<String, Never> {
         currentStateSubject
-            .map {
-                switch $0 {
-                case .idle: return .start
-                case .tracking: return .stop
-                case .finish: return .start
-                }
-                
-        }
-        .eraseToAnyPublisher()
+            .map(\.buttonTitle)
+            .eraseToAnyPublisher()
+    }
+    
+    var isTracking: AnyPublisher<Bool, Never> {
+        currentStateSubject
+            .map { $0 == .tracking }
+            .eraseToAnyPublisher()
     }
     
     var locationList: AnyPublisher<[CLLocation], Never> {
@@ -105,7 +104,18 @@ final class ViewModel {
 }
 
 // MARK: Constant
+private extension ViewModel.State {
+    var buttonTitle: String {
+        switch self {
+        case .idle: return .start
+        case .tracking: return .stop
+        case .finish: return .reset
+        }
+    }
+}
+
 private extension String {
     static let start = "START"
     static let stop = "STOP"
+    static let reset = "RESET"
 }
